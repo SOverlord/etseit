@@ -17,7 +17,7 @@ function seguridadIndex()
     if (isset($_SESSION['usuario']))
     {
         
-        header("Location: correcto.php");
+        header("Location: cart.php");
         exit();
     }
     else if( isset($_COOKIE['identificado']))
@@ -26,7 +26,7 @@ function seguridadIndex()
         $idusuario = comprobarCookie($cookie);
         if(!$idusuario)
         {
-            header("Location: correcto.php");
+            header("Location: cart.php");
             exit();
         }
     }
@@ -70,7 +70,7 @@ function seguridad(){
  */
 function comprobarCookie($cookie)
 {
-    $conexion=mysql_connect("localhost","root","",false);
+    $conexion=mysql_connect("localhost","root","qwerty",false);
     $bd = mysql_select_db("login",$conexion);
     mysql_query("SET NAMES 'utf8'");
     
@@ -95,30 +95,6 @@ function comprobarCookie($cookie)
  * @param string $pass
  * @return int 
  */
-
-/*
-  header('Content-Type: text/html; charset=UTF-8');
-   $usr= utf8_decode($_POST["usuario"]);
-   $fn=utf8_decode($_POST["fullName"]);
-   $pswd=utf8_decode($_POST["password"]);
-   $profile=$_POST["perfil"];
-
-   $checkUsers = "SELECT Usuario FROM  Usuarios WHERE UPPER(Usuario)='".strtoupper(utf8_encode($usr))."'";
-   $resultCheckingUsers = mysql_query($checkUsers, $driver);
-   if(mysql_affected_rows()>0){
-    print("<strong>Usuario duplicado</strong>");
-   }
-   else{
-    $sql="INSERT INTO Usuarios (Usuario,NombreCompleto,Contrasena,Status, Perfil) VALUES ('".utf8_encode($usr)."','".utf8_encode($fn)."','".utf8_encode($pswd)."',1,'".$profile."')";
-    $res=mysql_query($sql,$driver);
-    if($res){
-       print("<strong>El registro se inserto correctamente</strong>");
-       print("<a href='login.php'><button>Regresar</button></a>");
-    }else{
-      print("<strong>El registro NO se inserto correctamente</strong>");
-    }
-   }
-*/
 function registrarUsuario($user,$pass)
 {
     $user = mysql_escape_string($user);
@@ -128,7 +104,7 @@ function registrarUsuario($user,$pass)
     global $salt;
     $pass = sha1($salt.md5($pass));
     
-    $conexion=mysql_connect("localhost","root","",false);
+    $conexion=mysql_connect("localhost","root","qwerty",false);
     $bd = mysql_select_db("login",$conexion);
     mysql_query("SET NAMES 'utf8'");
     
@@ -164,16 +140,16 @@ function login ($user,$pass,$recordarme)
     global $salt;
     $pass = sha1($salt.md5($pass));
     
-    $conexion=mysql_connect("localhost","root","",false);
-    $bd = mysql_select_db("login",$conexion);
+    $conexion=mysql_connect("localhost","root","qwerty",false);
+    $bd = mysql_select_db("etseit",$conexion);
     mysql_query("SET NAMES 'utf8'");
     
-    $sql = "select idUsuario from usuario where UPPER(login)='".strtoupper($user)."' and pass='".$pass."'";
+    $sql = "select idUsuarios from Usuarios where UPPER(Usuario)='".strtoupper($user)."' and Contrasena='".$pass."'";
     $result = mysql_query($sql,$conexion);
     if(mysql_affected_rows()<=0 || !$result) return -1; //user repetido
     
     $row = mysql_fetch_array($result);
-    $idUsuario = $row['idUsuario'];
+    $idUsuario = $row['idUsuarios'];
     $_SESSION['usuario']=$idUsuario;
     
     if($recordarme){
@@ -181,7 +157,7 @@ function login ($user,$pass,$recordarme)
 
         $cookie = sha1($saltCookie.md5($idUsuario.date("Y-d-m h:i:s")));
 
-        $sql2 = "update usuario set cookie='".$cookie."',validez=DATE_ADD(now(),INTERVAL 6 MINUTE) where `idUsuario`='".$idUsuario."'";
+        $sql2 = "update Usuarios set cookie='".$cookie."',validez=DATE_ADD(now(),INTERVAL 6 MINUTE) where `idUsuarios`='".$idUsuario."'";
         $result2 = mysql_query($sql2,$conexion);
 
         setCookie("identificado",$cookie,time()+360,'/'); //cookie 6min
@@ -196,7 +172,7 @@ function destruirCookie($cookie)
     if(!isset($_SESSION['usuario'])) return;
     else $idusuario = $_SESSION['usuario'];
     
-    $conexion=mysql_connect("localhost","root","",false);
+    $conexion=mysql_connect("localhost","root","qwerty",false);
     $bd = mysql_select_db("login",$conexion);
     mysql_query("SET NAMES 'utf8'");
     

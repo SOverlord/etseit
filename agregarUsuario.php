@@ -22,7 +22,7 @@
     $res=mysql_query($sql,$driver);
     if($res){
        print("<strong>El registro se inserto correctamente</strong>");
-       print("<a href='login.php'><button>Regresar</button></a>");
+       print("<a href='index.php'><button>Comenzar a comprar</button></a>");
     }else{
       print("<strong>El registro NO se inserto correctamente</strong>");
     }

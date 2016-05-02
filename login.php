@@ -1,16 +1,29 @@
-<?php include ('conexion.php')
-?>
-<?php require ("funciones.php");
+<?php
+require ("funciones.php");
 
 seguridadIndex();
+
 $error = 0;
-$registrar = 0;
+$registrar=0;
 
-if(isset($_POST['registrar'])){
-	$registrar = 1;
-	$error = registrarUsuario(limpiar($_POST['user']), $_POST['pass']);
+if(isset($_POST['registrar']))
+{    
+    $registrar = 1;
+    $error = registrarUsuario(limpiar($_POST['user']), $_POST['pass']);
+   
 }
-
+else if(isset($_POST['login']))
+{
+    $recordarme=0;
+    if(isset($_POST['recordarme']))$recordarme=1;
+    $error = login(limpiar($_POST['user']), $_POST['pass'],$recordarme);
+    if($error>0)
+    {
+        header("Location: cart.php");
+        exit();
+    }
+    
+}
 ?>
 
 <!DOCTYPE html>
@@ -104,14 +117,30 @@ if(isset($_POST['registrar'])){
 				<div class="col-sm-4 col-sm-offset-1">
 					<div class="login-form"><!--login form-->
 						<h2>Ingresa a tu cuenta</h2>
-						<form action="#">
-							<input type="email" placeholder="Correo electrónico" name="mail" />
-							<input type="password" placeholder="Contraseña" name="password"/>
+						<form name="login" action="" method="post">
+							<input type="text" placeholder="Usuario" name="user" />
+							<input type="password" placeholder="Contraseña" name="pass"/>
 							<span>
 								<input type="checkbox" class="checkbox"> 
 								Mantener sesión iniciada
 							</span>
-							<button type="submit" class="btn btn-default">Ingresars</button>
+							<button name="login" type="submit" class="btn btn-default">Ingresar</button>
+							<?php
+					            switch ($error) {
+					                case -1://login
+					                    echo '<br/><strong>Usuario o clave incorrecta</strong>';
+					                    break;
+					                case -2://registro
+					                    echo '<br/><strong>Error al registrarse. Usuario ya existente.</strong>';
+					                    break;
+					                case -3://registro
+					                    echo '<br/><strong>El usuario y la contraseña deben tener como mínimo 4 carácteres.</strong>';
+					                    break;
+					                default:
+					                    if($registrar) echo '<br/><strong>Se ha registrado correctamente.</strong>';
+					                    break;
+					          	}
+							?>
 						</form>
 					</div><!--/login form-->
 				</div>
@@ -123,7 +152,7 @@ if(isset($_POST['registrar'])){
 					<div class="signup-form"><!--sign up form-->
 						<h2>¡Crea una nueva cuenta!</h2>
 						<form action="agregarUsuario.php" method="POST" accept-charset="utf-8">
-							<input type="text" placeholder="Usuario" name="usuario" <?php if($registrar && $error>0) echo 'value="'.limpiar($_POST['user']).'"'; ?> required/>
+							<input type="text" placeholder="Usuario" name="user" <?php if($registrar && $error>0) echo 'value="'.limpiar($_POST['user']).'"'; ?> required/>
 							<input type="text" placeholder="Nombre Completo" name="fullName" required/>
 							<input type="password" placeholder="Contraseña" name="password" required/>
 							<select name="perfil">

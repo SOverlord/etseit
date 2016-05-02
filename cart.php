@@ -1,4 +1,38 @@
-<?php include ('conexion.php')
+<?php
+include('conexion.php');
+require ("funciones.php");
+$error = 0;
+
+ seguridad(); //comprobamos que se esté logueado
+
+if(isset($_POST['salir']))
+{    
+    
+    destruirCookie($_COOKIE['identificado']);
+    
+    $_SESSION = array();
+ 
+    //guardar el nombre de la sessión para luego borrar las cookies
+    $session_name = session_name();
+ 
+    //Para destruir una variable en específico
+    unset($_SESSION['usuario']);
+ 
+    // Finalmente, destruye la sesión
+    session_destroy();
+ 
+    // Para borrar las cookies asociadas a la sesión
+    // Es necesario hacer una petición http para que el navegador las elimine
+    if ( isset( $_COOKIE[ $session_name ] ) ) {
+        setcookie($session_name, '', time()-3600, '/');   
+    }
+    if(isset($_COOKIE['identificado'])){
+        setcookie('identificado', '', time()-3600, '/'); 
+    }
+    header("Location: index.php");
+    exit();
+   
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -80,7 +114,17 @@
 								<li><a href="index.php"><i class="fa fa-home"></i> Inicio</a></li>
 								<li><a href="login.php"><i class="fa fa-lock"></i> Mi cuenta </a></li>
 								<li><a href="cart.php" class="active"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>
-								<!--<li><a href="consola.php"><i class="fa fa-barcode"></i> Consola</a></li>-->
+								<li>
+								<form name="login" method="post" action="">
+                  						<input type="submit" name="salir" id="salir" value="Salir" />
+          									<?php
+            									if ($error) {
+                									echo '<br/><strong>Usuario o clave incorrecta</strong>';
+												}
+											?>
+								</form>
+								</li>
+								<li><?php echo $_SESSION['usuario'];	?></li>
 							</ul>
 						</div>
 					</div>
@@ -88,6 +132,95 @@
 			</div>
 		</div><!--/header-bottom-->
 	</header><!--/header-->
+
+	<section id="cart_items">
+		<div class="container">
+			<div class="table-responsive cart_info">
+				<table class="table table-condensed">
+					<thead>
+					<h2 style="text-align: center;">Tus Reservas de Hotel</h2>
+						<tr class="cart_menu" style="text-align: center;">
+							<td><b>Nombre del Hotel</b></td>
+							<td><b>Ciudad</b></td>
+							<td><b>Inicio de Arrendamiento</b></td>
+							<td><b>Fin de Arrendamiento</b></td>
+							<td><b>Habitaciones reservadas</b></td>
+							<td><b>Precio por noche</b></td>
+							<td><b>Cancelación</b></td>
+						</tr>
+					</thead>
+					<tbody style="text-align: center;">
+					<?php
+						$varSesionUser = $_SESSION['usuario'];
+						$carritoHotel=mysql_query("SELECT * FROM ReservaHotel WHERE idUsuario='".$varSesionUser."'");
+						if (!$carritoHotel) {
+    						die('Query1 error: ' . mysql_error());
+						}else{
+							$consultaHotel=mysql_num_rows($carritoHotel);
+							if (!$consultaHotel) {
+	    						die('Query2 error: ' . mysql_error());
+							}
+							else{
+								if($consultaHotel>0){
+									while ($productoCarrito_Hotel=mysql_fetch_array($carritoHotel)) {
+										if (!$productoCarrito_Hotel) {
+		    								die('Query3 error: ' . mysql_error());
+										}
+										else{
+											//Recuperamos todos los datos de la reserva
+											$idReserva=$productoCarrito_Hotel['idReserva'];
+											$idHotel=$productoCarrito_Hotel['Hotel_idHotel'];			//-->Con otra consulta recuperaremos el nombre del hotel, tasa y costo
+											$fechaInicio=$productoCarrito_Hotel['FechaInicio'];
+											$fechaFinal=$productoCarrito_Hotel['FechaFinal'];
+											//$costo=$productoCarrito_Hotel['CosteAsociado'];
+											$habitacionesReservadas=$productoCarrito_Hotel['NoHabitaciones'];
+
+											$selectHotel=mysql_query("SELECT * FROM Hotel WHERE '".$idHotel."' = idHotel ");
+											while($valHotel=mysql_fetch_array($selectHotel)){
+												$nombreHotel=$valHotel['NombreHotel'];
+												$costoHotel=$valHotel['Precio'];
+											}
+											
+											$IDciudadHotel=mysql_query("SELECT * FROM CiudadHotel WHERE '".$idHotel."' = CiudadHotel_idHotel_fk ");
+											while($ciudadHotel=mysql_fetch_array($IDciudadHotel)){
+												$idCiudad=$ciudadHotel['CiudadHotel_idCiudad_fk'];
+											}
+											$nC=mysql_query("SELECT NombreCiudad FROM Ciudad WHERE '".$idCiudad."' = idCiudad ");
+											while($nCiud=mysql_fetch_array($nC)){
+												$nombreCiudad=$nCiud['NombreCiudad'];
+											}
+
+											if(!$idReserva) die('idReserva error: ' . mysql_error());
+											if(!$idHotel) die('idHotel error: ' . mysql_error());
+											if(!$fechaInicio) die('fechaInicio error: ' . mysql_error());
+											if(!$fechaFinal) die('fechaFinal error: ' . mysql_error());
+											if(!$habitacionesReservadas) die('habitacionesReservadas error: ' . mysql_error());
+											if(!$nombreHotel) die('nombreHotel error: ' . mysql_error());
+											if(!$costoHotel) die('costoHotel error: ' . mysql_error());
+											if(!$IDciudadHotel) die('IDciudadHotel error: ' . mysql_error());
+											if(!$idCiudad) die('idCiudad error: ' . mysql_error());
+											if(!$nC) die('nC error: ' . mysql_error());
+											if(!$nombreCiudad) die('nombreCiudad error: ' . mysql_error());
+										}
+									}
+								}
+							}
+						}
+					?>
+						<tr>
+							<td><?php echo $nombreHotel; 	?></td>
+							<td><?php echo $nombreCiudad; 		?></td>
+							<td><?php echo $fechaInicio; 	?></td>
+							<td><?php echo $fechaFinal; 	?></td>
+							<td><?php echo $habitacionesReservadas;	?></td>
+							<td><?php echo $costoHotel; 	?></td>
+							<td>CANCELAR</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>
  
 	<section id="cart_items">
 		<div class="container">
@@ -95,7 +228,7 @@
 				<table class="table table-condensed">
 					<thead>
 						<tr class="cart_menu" style="text-align:center">
-							<td class="image"><b>Imágen</b></td>
+							<td class="image"><b>TIPO</b></td>
 							<td class="description"><b>Descripción</b></td>
 							<td class="price"><b>Precio</b></td>
 							<td class="quantity"><b>Cantidad</b></td>
@@ -105,27 +238,14 @@
 					</thead>
 					<tbody>
                   <?php
-                     if(isset($_POST['id_'])){
-                        $id=$_POST['id_'];
-                        $nom=$_POST['nombre'];
-                        $costo=$_POST['costo'];
-                        $imagen=$_POST['imagen'];
-                        $descripcion=$_POST['descripcion'];
-                        
-   $sql="INSERT INTO carrito (id, nombre, costo, imagen, descripcion) VALUE('".$id."', '".$nom."', '".$costo."', '".$imagen."', '".$descripcion."')";
-   $res=mysql_query($sql, $driver);
-   if($res){
-      print("<p>Registro insertado correctamente</p>");
-   }
-}
-   $consultar=mysql_query("SELECT * FROM carrito");
-   $cont=mysql_num_rows($consultar);
-   if($cont>0){
-      while($prodCarrito=mysql_fetch_array($consultar)){
-         $key=$prodCarrito['id'];
-         $id=$prodCarrito['id'];
-         $nombre=$prodCarrito['nombre'];
-         $costo=$prodCarrito['costo'];
+   					$consultar=mysql_query("SELECT * FROM carrito");
+   					$cont=mysql_num_rows($consultar);
+   					if($cont>0){
+   						while($prodCarrito=mysql_fetch_array($consultar)){
+   							$key=$prodCarrito['id'];
+   							$id=$prodCarrito['id'];
+   							$nombre=$prodCarrito['nombre'];$costo=$prodCarrito['costo'];
+
          $imagen=$prodCarrito['imagen'];
          $descripcion=$prodCarrito['descripcion'];
                   ?>
