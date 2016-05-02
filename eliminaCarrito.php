@@ -8,9 +8,9 @@
 <body>
 <?php
    $key = $_GET['k'];
-   $sql=mysql_query("DELETE FROM carrito WHERE id=".$key);
-//	print("El registro se ha eliminado correctamente");
-//   print("<a href='cart.php'>Regresar</a>");
+   $sql=mysql_query("DELETE FROM ReservaHotel WHERE idReserva='".$key."'");
+	//print("El registro se ha eliminado correctamente");
+	//print("<a href='cart.php'>Regresar</a>");
 ?>
 
 </body>

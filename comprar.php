@@ -41,14 +41,14 @@ if(isset($_POST['salir']))
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Compra en línea - Carrito de Compras</title>
+    <title>Compra en línea - Registrar producto</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/prettyPhoto.css" rel="stylesheet">
     <link href="css/price-range.css" rel="stylesheet">
     <link href="css/animate.css" rel="stylesheet">
 	<link href="css/main.css" rel="stylesheet">
-	<link href="css/responsive.css" rel="stylesheet"> 
+	<link href="css/responsive.css" rel="stylesheet">
     <!--[if lt IE 9]>
     <script src="js/html5shiv.js"></script>
     <script src="js/respond.min.js"></script>
@@ -58,11 +58,6 @@ if(isset($_POST['salir']))
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
-   <script languaje="javascript">
-      function pasaValor(form){
-         calcular.costoTotal.value = calcular.cantidad.value;
-      }
-   </script>
 </head><!--/head-->
 
 <body>
@@ -111,20 +106,10 @@ if(isset($_POST['salir']))
 						</div>
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a href="comprar.php"><i class="fa fa-home"></i> Comprar</a></li>
+								<li><a href="comprar.php" class="active"><i class="fa fa-home"></i> Comprar</a></li>
 								<li><a href="index.php"><i class="fa fa-lock"></i> Mi cuenta </a></li>
-								<li><a href="cart.php" class="active"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>
-								<li>
-								<form name="login" method="post" action="">
-                  						<input type="submit" name="salir" id="salir" value="Salir" />
-          									<?php
-            									if ($error) {
-                									echo '<br/><strong>Usuario o clave incorrecta</strong>';
-												}
-											?>
-								</form>
-								</li>
-								<li><?php echo $_SESSION['usuario'];	?></li>
+								<li><a href="cart.php"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>
+                        		<!--<li><a href="consola.php"><i class="fa fa-barcode"></i> Consola</a></li>-->
 							</ul>
 						</div>
 					</div>
@@ -132,147 +117,101 @@ if(isset($_POST['salir']))
 			</div>
 		</div><!--/header-bottom-->
 	</header><!--/header-->
+	
 
-	<!--Muestra carrito de Hotel-->
-	<section id="cart_items">
+	<section>
 		<div class="container">
-			<div class="table-responsive cart_info">
-				<table class="table table-condensed">
-					<thead>
-					<h2 style="text-align: center;">Tus Reservas de Hotel</h2>
-						<tr class="cart_menu" style="text-align: center;">
-							<td><b>Nombre del Hotel</b></td>
-							<td><b>Ciudad</b></td>
-							<td><b>Inicio de Arrendamiento</b></td>
-							<td><b>Fin de Arrendamiento</b></td>
-							<td><b>Habitaciones reservadas</b></td>
-							<td><b>Precio por noche</b></td>
-							<td><b>Cancelación</b></td>
-						</tr>
-						<?php
-							$varSesionUser = $_SESSION['usuario'];
-							$carritoHotel=mysql_query("SELECT * FROM ReservaHotel WHERE idUsuario='".$varSesionUser."'");
-							if ($carritoHotel) {
-								$consultaHotel=mysql_num_rows($carritoHotel);
-								if ($consultaHotel) {
-									while ($productoCarrito_Hotel=mysql_fetch_array($carritoHotel)) {
-										if ($productoCarrito_Hotel) {
-											//Recuperamos todos los datos de la reserva
-											$idReserva=$productoCarrito_Hotel['idReserva'];
-											$idHotel=$productoCarrito_Hotel['Hotel_idHotel'];			//-->Con otra consulta recuperaremos el nombre del hotel, tasa y costo
-											$fechaInicio=$productoCarrito_Hotel['FechaInicio'];
-											$fechaFinal=$productoCarrito_Hotel['FechaFinal'];
-											//$costo=$productoCarrito_Hotel['CosteAsociado'];
-											$habitacionesReservadas=$productoCarrito_Hotel['NoHabitaciones'];
-
-											$selectHotel=mysql_query("SELECT * FROM Hotel WHERE '".$idHotel."' = idHotel ");
-											while($valHotel=mysql_fetch_array($selectHotel)){
-												$nombreHotel=$valHotel['NombreHotel'];
-												$costoHotel=$valHotel['Precio'];
-											}
-												
-											$IDciudadHotel=mysql_query("SELECT * FROM CiudadHotel WHERE '".$idHotel."' = CiudadHotel_idHotel_fk ");
-											while($ciudadHotel=mysql_fetch_array($IDciudadHotel)){
-												$idCiudad=$ciudadHotel['CiudadHotel_idCiudad_fk'];
-											}
-											$nC=mysql_query("SELECT NombreCiudad FROM Ciudad WHERE '".$idCiudad."' = idCiudad ");
-											while($nCiud=mysql_fetch_array($nC)){
-												$nombreCiudad=$nCiud['NombreCiudad'];
-											}
-											?>
-											</thead>
-											<tbody style="text-align: center;">
-											<tr>
-												<td><?php echo $nombreHotel; 	?></td>
-												<td><?php echo $nombreCiudad; 		?></td>
-												<td><?php echo $fechaInicio; 	?></td>
-												<td><?php echo $fechaFinal; 	?></td>
-												<td><?php echo $habitacionesReservadas;	?></td>
-												<td><?php echo $costoHotel; 	?></td>
-												<td class="cart_delete" style="text-align:center">
-													<form action="eliminaCarrito.php" mehtod="GET" target="_self">
-					                              <input name="k" type="hidden" value="<?php echo $idReserva; ?>">
-					                              <input type="submit" value="Cancelar"> </td>
-											</tr> <?php
-											if(!$idReserva) die('idReserva error: ' . mysql_error());
-											if(!$idHotel) die('idHotel error: ' . mysql_error());
-											if(!$fechaInicio) die('fechaInicio error: ' . mysql_error());
-											if(!$fechaFinal) die('fechaFinal error: ' . mysql_error());
-											if(!$habitacionesReservadas) die('habitacionesReservadas error: ' . mysql_error());
-											if(!$nombreHotel) die('nombreHotel error: ' . mysql_error());
-											if(!$costoHotel) die('costoHotel error: ' . mysql_error());
-											if(!$IDciudadHotel) die('IDciudadHotel error: ' . mysql_error());
-											if(!$idCiudad) die('idCiudad error: ' . mysql_error());
-											if(!$nC) die('nC error: ' . mysql_error());
-											if(!$nombreCiudad) die('nombreCiudad error: ' . mysql_error());
-										}else{	die('productoCarrito_Hotel error: ' . mysql_error());	}
-									}
-								}else{	print("<tr><h1>Usted aún no realiza ninguna compra</h1></tr></thead><tbody>");	}
-							}else{	die('carritoHotel error: ' . mysql_error());	}
-						?>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</section>	
-
-	<!--Muestra carrito de Barco-->
-
-	<!--Muestra carrito de boletos de Avión-->
-
-	<!--Muestra carrito de Vehículos-->
-
-
-	<section id="do_action">
-		<div class="container">
-			<div class="heading">
-				<h3>Verifica tus datos</h3>
-				<p>Comprueba que tu monto total de compra e ingresa los datos donde será realizado el envío.</p>
-			</div>
 			<div class="row">
-				<div class="col-sm-6">
-					<div class="chose_area">
-						<ul class="user_info">
-							<li class="single_field">
-								<label>País:</label>
-								<select name="pais">
-									<option value="mex">México</option>
-									<option value="eua">Estados Unidos</option>
-									<option value="uk">UK</option>
-									<option value="can">Canadá</option>
-									<option value="pak">Pakistan</option>
-								</select>
-							</li>
-							<li class="single_field">
-								<label>Ciudad</label>
-								<input type="text" name="ciudad">
-							</li>
-							<li class="single_field">
-								<label>Dirección</label>
-								<input type="text" name="direccion">
-							</li>
-							<li class="single_field zip-field">
-								<label>CP:</label>
-								<input type="text" name="cp">
-							</li>
-						</ul>
+				<div class="col-sm-3">
+					<div class="left-sidebar">
+						<h2>Categorías</h2>
+						<div class="panel-group category-products" id="accordian"><!--category-productsr-->
+                     <form action="index.php" target="_self" method="post">
+                        <h4>Seleccione tipo de búsqueda</h4>
+                        <select name="buscar">
+                           <option value="0">Todos</option>
+                           <option value="avion">Vuelos de Avión</option>
+                           <option value="barco">Barcos</option>
+                           <option value="hotel">Hoteles</option>
+                           <option value="auto">Autos</option>
+                        </select>
+                        <input type="submit" value="Buscar">
+                     </form>
+						   </div><!--/category-products-->
+                     <div class="shipping text-center"><!--shipping-->
+                        <img src="images/home/shipping.jpg" alt="" />
+						   </div><!--/shipping-->
 					</div>
 				</div>
-				<div class="col-sm-6">
-					<div class="total_area">
-						<ul>
-							<li>Sub total <span>$59</span></li>
-							<li>Impuestos <span>$2</span></li>
-							<li>Costo de envío <span>Free</span></li>
-							<li>Total <span>$61</span></li>
-						</ul>
-							<a class="btn btn-default check_out" href="">Realizar Compra</a>
-					</div>
+				
+				<div class="col-sm-9 padding-right">
+					<div class="features_items"><!--features_items-->
+						<h2 class="title text-center">Productos</h2>
+               <!--Inicia la tabla de la BD para mostrar el stock-->
+               <?php
+                  $consultar=mysql_query("SELECT * FROM Automovil");     //Si es la primera entrada, muestro todo el stock
+                  //$consultar2=mysql_query("SELECT * FROM Barco");
+                  //$consultar3=mysql_
+                  if(isset($_POST['buscar'])){                          //Si existe una búsqueda...
+                     $valor = $_POST['buscar'];                         //buscar->$valor
+                     if($valor == '0'){                                 //Si se eligieron "Todos" los productos...
+                        $consultar=mysql_query("SELECT * FROM productos");  //Muestra todos los productos
+                     }else{                                             //Si no...
+                        $consultar=mysql_query("SELECT * FROM productos WHERE tipo LIKE '%".$valor."%'"); //Muestra la categoría seleccionada
+                     }
+               }
+               $cont = mysql_num_rows($consultar); //Contamos la cantidad de columnas existentes en la consulta.
+//               print($cont);        //Prueba de impresión de la cantidad de columnas.
+               if($cont > 0){        //Si existen más de 0 columnas...
+                  while($prod=mysql_fetch_array($consultar)){  //Y mientras haya una columna por imprimir...
+                     //Recuperamos los datos y los imprimimos
+                     $id=$prod['idAutomovil'];
+                     $nombre=$prod['NombreAutomovil'];
+                     $descripcion=$prod['Gama'];
+                     $costo=$prod['Precio'];
+               ?>
+                  <div class="col-sm-4">
+                     <div class="product-image-wrapper">
+                        <div class="single-products">
+                           <div class="productinfo text-center">
+                              <h2><?php print("$ "); echo $costo ?></h2>
+                              <h2>Marca: </h2><p><?php echo $nombre ?></p>
+                              <h2>Gamma: </h2><p><?php echo $descripcion ?></p>
+                           </div>
+                           <div class="product-overlay">
+                              <div class="overlay-content">
+                                 <h2><?php print("$ "); echo $costo ?></h2>
+                                 <p><?php echo $descripcion ?></p>
+                                 <form action="cart.php" method="post" name="comprar">
+                                    <input name="id_" type="hidden" value="<?php echo $id ?>" />
+                                    <input name="nombre" type="hidden" value="<?php echo $nombre ?>" />
+                                    <input name="costo" type="hidden" value="<?php echo $costo ?>" />
+                                    <input name="descripcion" type="hidden" value="<?php echo $descripcion ?>" />
+                                    <a class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i> <input name="Comprar" type="submit" value="Adquirir"/></a>
+                                 </form>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               <?php
+                  }
+               }
+               else{//Si no existen columnas en la consulta... Arrojamos un error.
+                  print("<div style='text-align:center'>
+                  <img src='images/404/404.png' width=40% height=40% />
+                  <h1>Ooops!</h1>
+                  <p>Actualmente no contamos con estos productos.</p>
+                  </div>");
+               }
+               ?>
+               <!--Termina la tabla de la BD para mostrar el stock-->
+               </div>
 				</div>
 			</div>
 		</div>
-	</section><!--/#do_action-->
-
+	</section>
+	
 	<footer id="footer"><!--Footer-->
 		<div class="footer-top">
 			<div class="container">
@@ -361,11 +300,11 @@ if(isset($_POST['salir']))
 						<div class="single-widget">
 							<h2>Service</h2>
 							<ul class="nav nav-pills nav-stacked">
-								<li><a href="">Online Help</a></li>
-								<li><a href="">Contact Us</a></li>
-								<li><a href="">Order Status</a></li>
-								<li><a href="">Change Location</a></li>
-								<li><a href="">FAQ’s</a></li>
+								<li><a href="#">Online Help</a></li>
+								<li><a href="#">Contact Us</a></li>
+								<li><a href="#">Order Status</a></li>
+								<li><a href="#">Change Location</a></li>
+								<li><a href="#">FAQ’s</a></li>
 							</ul>
 						</div>
 					</div>
@@ -373,11 +312,11 @@ if(isset($_POST['salir']))
 						<div class="single-widget">
 							<h2>Quock Shop</h2>
 							<ul class="nav nav-pills nav-stacked">
-								<li><a href="">T-Shirt</a></li>
-								<li><a href="">Mens</a></li>
-								<li><a href="">Womens</a></li>
-								<li><a href="">Gift Cards</a></li>
-								<li><a href="">Shoes</a></li>
+								<li><a href="#">T-Shirt</a></li>
+								<li><a href="#">Mens</a></li>
+								<li><a href="#">Womens</a></li>
+								<li><a href="#">Gift Cards</a></li>
+								<li><a href="#">Shoes</a></li>
 							</ul>
 						</div>
 					</div>
@@ -385,11 +324,11 @@ if(isset($_POST['salir']))
 						<div class="single-widget">
 							<h2>Policies</h2>
 							<ul class="nav nav-pills nav-stacked">
-								<li><a href="">Terms of Use</a></li>
-								<li><a href="">Privecy Policy</a></li>
-								<li><a href="">Refund Policy</a></li>
-								<li><a href="">Billing System</a></li>
-								<li><a href="">Ticket System</a></li>
+								<li><a href="#">Terms of Use</a></li>
+								<li><a href="#">Privecy Policy</a></li>
+								<li><a href="#">Refund Policy</a></li>
+								<li><a href="#">Billing System</a></li>
+								<li><a href="#">Ticket System</a></li>
 							</ul>
 						</div>
 					</div>
@@ -397,11 +336,11 @@ if(isset($_POST['salir']))
 						<div class="single-widget">
 							<h2>About Shopper</h2>
 							<ul class="nav nav-pills nav-stacked">
-								<li><a href="">Company Information</a></li>
-								<li><a href="">Careers</a></li>
-								<li><a href="">Store Location</a></li>
-								<li><a href="">Affillate Program</a></li>
-								<li><a href="">Copyright</a></li>
+								<li><a href="#">Company Information</a></li>
+								<li><a href="#">Careers</a></li>
+								<li><a href="#">Store Location</a></li>
+								<li><a href="#">Affillate Program</a></li>
+								<li><a href="#">Copyright</a></li>
 							</ul>
 						</div>
 					</div>
@@ -432,10 +371,11 @@ if(isset($_POST['salir']))
 	</footer><!--/Footer-->
 	
 
-
+  
     <script src="js/jquery.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/jquery.scrollUp.min.js"></script>
+	<script src="js/price-range.js"></script>
     <script src="js/jquery.prettyPhoto.js"></script>
     <script src="js/main.js"></script>
 </body>
