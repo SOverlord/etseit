@@ -126,14 +126,14 @@ if(isset($_POST['salir']))
 					<div class="left-sidebar">
 						<h2>Categorías</h2>
 						<div class="panel-group category-products" id="accordian"><!--category-productsr-->
-                     <form action="index.php" target="_self" method="post">
+                     <form action="comprar.php" target="_self" method="post">
                         <h4>Seleccione tipo de búsqueda</h4>
                         <select name="buscar">
-                           <option value="0">Todos</option>
-                           <option value="avion">Vuelos de Avión</option>
-                           <option value="barco">Barcos</option>
-                           <option value="hotel">Hoteles</option>
-                           <option value="auto">Autos</option>
+                           <option value="Todos">Todos</option>
+                           <option value="Aviones">Vuelos de Avión</option>
+                           <option value="Barcos">Barcos</option>
+                           <option value="Hoteles">Hoteles</option>
+                           <option value="Autos">Autos</option>
                         </select>
                         <input type="submit" value="Buscar">
                      </form>
@@ -143,27 +143,37 @@ if(isset($_POST['salir']))
 						   </div><!--/shipping-->
 					</div>
 				</div>
-				
-				<div class="col-sm-9 padding-right">
-					<div class="features_items"><!--features_items-->
-						<h2 class="title text-center">Productos</h2>
-               <!--Inicia la tabla de la BD para mostrar el stock-->
                <?php
-                  $consultar=mysql_query("SELECT * FROM Automovil");     //Si es la primera entrada, muestro todo el stock
-                  //$consultar2=mysql_query("SELECT * FROM Barco");
-                  //$consultar3=mysql_
+                  $ct=mysql_query("SELECT * FROM Automovil");     //Si es la primera entrada, muestro todo el stock
                   if(isset($_POST['buscar'])){                          //Si existe una búsqueda...
                      $valor = $_POST['buscar'];                         //buscar->$valor
-                     if($valor == '0'){                                 //Si se eligieron "Todos" los productos...
-                        $consultar=mysql_query("SELECT * FROM productos");  //Muestra todos los productos
-                     }else{                                             //Si no...
-                        $consultar=mysql_query("SELECT * FROM productos WHERE tipo LIKE '%".$valor."%'"); //Muestra la categoría seleccionada
+                     if($valor == 'Todos'){                                 //Si se eligieron "Todos" los productos...
+                        $ct=mysql_query("SELECT * FROM Automovil");
+                     }
+                     if($valor == 'Autos'){
+                     	$ct=mysql_query("SELECT * FROM Automovil");
+                     }
+                     if($valor == 'Aviones'){                                             //Si no...
+                     	$ct=mysql_query("SELECT * FROM nada");
+                     }
+                     if($valor == 'Barcos'){                                             //Si no...
+                     	$ct=mysql_query("SELECT * FROM nada");
+                     }
+                     if($valor == 'Hoteles'){                                             //Si no...
+                     	$ct=mysql_query("SELECT * FROM nada");
                      }
                }
-               $cont = mysql_num_rows($consultar); //Contamos la cantidad de columnas existentes en la consulta.
+				?>
+				<div class="col-sm-9 padding-right">
+					<div class="features_items"><!--features_items-->
+						<h2 class="title text-center">VER <?php if($valor) echo $valor; else{print("TODOS");} ?></h2>
+               <!--Inicia la tabla de la BD para mostrar el stock-->
+
+				<?php
+               $cont = mysql_num_rows($ct); //Contamos la cantidad de columnas existentes en la consulta.
 //               print($cont);        //Prueba de impresión de la cantidad de columnas.
                if($cont > 0){        //Si existen más de 0 columnas...
-                  while($prod=mysql_fetch_array($consultar)){  //Y mientras haya una columna por imprimir...
+                  while($prod=mysql_fetch_array($ct)){  //Y mientras haya una columna por imprimir...
                      //Recuperamos los datos y los imprimimos
                      $id=$prod['idAutomovil'];
                      $nombre=$prod['NombreAutomovil'];
