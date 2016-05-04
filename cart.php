@@ -116,7 +116,7 @@ if(isset($_POST['salir']))
 								<li><a href="cart.php" class="active"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>
 								<li>
 								<form name="login" method="post" action="">
-                  						<input type="submit" name="salir" id="salir" value="Salir" />
+                  						<input type="submit" name="salir" id="salir" value="Cerrar Sesión" />
           									<?php
             									if ($error) {
                 									echo '<br/><strong>Usuario o clave incorrecta</strong>';
@@ -124,7 +124,6 @@ if(isset($_POST['salir']))
 											?>
 								</form>
 								</li>
-								<li><?php echo $_SESSION['usuario'];	?></li>
 							</ul>
 						</div>
 					</div>

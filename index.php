@@ -1,5 +1,8 @@
 <?php
+
 require ("funciones.php");
+session_start();
+//echo $_SESSION['img_number']."  ";
 seguridadIndex();
 $error = 0;
 $registrar=0;
@@ -13,7 +16,12 @@ else if(isset($_POST['login']))
 {
     $recordarme=0;
     if(isset($_POST['recordarme']))$recordarme=1;
-    $error = login(limpiar($_POST['user']), $_POST['pass'],$recordarme);
+    if($_SESSION['img_number'] == $_POST['num']){
+    	$error = login(limpiar($_POST['user']), $_POST['pass'],$recordarme);
+    }
+    else{
+    	$error=-4;
+    }
     if($error>0)
     {
         header("Location: cart.php");
@@ -117,6 +125,8 @@ else if(isset($_POST['login']))
 						<form name="login" action="" method="post">
 							<input type="text" placeholder="Usuario" name="user" />
 							<input type="password" placeholder="Contraseña" name="pass"/>
+							<img alt="Numeros aleatorios" src="captcha.php" /> 
+							<input class="label_form" type="text" name="num"/><br>
 							<span>
 								<input type="checkbox" class="checkbox"> 
 								Mantener sesión iniciada
@@ -132,6 +142,9 @@ else if(isset($_POST['login']))
 					                    break;
 					                case -3://registro
 					                    echo '<br/><strong>El usuario y la contraseña deben tener como mínimo 4 carácteres.</strong>';
+					                    break;
+					                case -4:
+					                	echo '<br/><strong>Captcha incorrecto. Vuelva a intentar.</strong>';
 					                    break;
 					                default:
 					                    if($registrar) echo '<br/><strong>Se ha registrado correctamente.</strong>';
