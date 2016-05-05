@@ -58,11 +58,6 @@ if(isset($_POST['salir']))
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
-   <script languaje="javascript">
-      function pasaValor(form){
-         calcular.costoTotal.value = calcular.cantidad.value;
-      }
-   </script>
 </head><!--/head-->
 
 <body>
@@ -112,19 +107,24 @@ if(isset($_POST['salir']))
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
 								<li><a href="comprar.php"><i class="fa fa-home"></i> Comprar</a></li>
-								<li><a href="index.php"><i class="fa fa-lock"></i> Mi cuenta </a></li>
+								<!--<li><a href="index.php"><i class="fa fa-lock"></i> Mi cuenta </a></li>-->
 								<li><a href="cart.php" class="active"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>
+								<li><a href="perfil.php"><i class="fa fa-lock"></i> Mi Perfil </a></li>
 							</ul>
 						</div>
 					</div>
-					<?php echo $_SESSION['usuario'];?>
+					<?php 
+
+					$datosUsuario=mysql_query("SELECT * FROM Usuario WHERE idUsuario = '".$_SESSION['usuario']."' ");
+					if(is_resource($datosUsuario) and mysql_num_rows($datosUsuario)>0){
+						$du=mysql_fetch_array($datosUsuario);
+						$nombreUsuario=$du['Alias'];
+					}
+					?>
 					<form name="login" method="post" action="" style="text-align:right;">
+							<h2>Bienvenido, <?php echo $nombreUsuario; ?></h2>
       						<input type="submit" name="salir" id="salir" value="Cerrar Sesión" />
-									<?php
-									if ($error) {
-    									echo '<br/><strong>Usuario o clave incorrecta</strong>';
-									}
-								?>
+							<?php	if ($error) {	echo '<br/><strong>Usuario o clave incorrecta</strong>';	}	?>
 					</form>
 				</div>
 			</div>
@@ -518,7 +518,7 @@ if(isset($_POST['salir']))
 						<ul class="user_info">
 							<h3>Datos de Tarjeta</h3>
 							<li class="single_field">
-								<input type="text" placeholder="Numero de tarjeta" autofocus required>
+								<input type="text" placeholder="Numero de tarjeta" required>
 							</li>
 							<li class="single_field">
 								<input type="text" placeholder="Vencimiento" required>

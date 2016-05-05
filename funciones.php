@@ -74,7 +74,7 @@ function comprobarCookie($cookie)
     $bd = mysql_select_db("login",$conexion);
     mysql_query("SET NAMES 'utf8'");
     
-    $sql = "select idUsuario from usuario where cookie='".mysql_escape_string($cookie)."' and validez>'".date("Y-m-d h:i:s")."'";
+    $sql = "select idUsuario from Usuario where Cookie='".mysql_escape_string($cookie)."' and Validez>'".date("Y-m-d h:i:s")."'";
     $result = mysql_query($sql,$conexion);
     
     if(!$result || mysql_affected_rows()<1) return false;
@@ -95,25 +95,26 @@ function comprobarCookie($cookie)
  * @param string $pass
  * @return int 
  */
-function registrarUsuario($user,$pass)
+function registrarUsuario($user,$pass, $name, $perfil)
 {
     $user = mysql_escape_string($user);
     $pass = mysql_escape_string($pass);
+    $name = mysql_escape_string($name);
     if(strlen($user)<4 || strlen($pass)<4) return -3;
     
     global $salt;
     $pass = sha1($salt.md5($pass));
     
     $conexion=mysql_connect("localhost","root","qwerty",false);
-    $bd = mysql_select_db("login",$conexion);
+    $bd = mysql_select_db("etseitSystem",$conexion);
     mysql_query("SET NAMES 'utf8'");
     
     
-    $sql1 = "select idUsuario from usuario where UPPER(login)='".strtoupper($user)."'";
+    $sql1 = "select idUsuario from Usuario where UPPER(Alias)='".strtoupper($user)."'";
     $result1 = mysql_query($sql1,$conexion);
     if(mysql_affected_rows()>0) return -2; //user repetido
     
-    $sql = "insert into usuario (login,pass) values ('".$user."','".$pass."')";
+    $sql = "insert into Usuario (Alias, NombreCompleto, Password, Status, NumViajes, fk_idPerfil_Usuario) values ('".$user."','".$name."','".$pass."', 1, 0, '".$perfil."')";
     $result = mysql_query($sql,$conexion);
     
     if($result) return 1; //registro correcto
@@ -173,10 +174,10 @@ function destruirCookie($cookie)
     else $idusuario = $_SESSION['usuario'];
     
     $conexion=mysql_connect("localhost","root","qwerty",false);
-    $bd = mysql_select_db("login",$conexion);
+    $bd = mysql_select_db("etseitSystem",$conexion);
     mysql_query("SET NAMES 'utf8'");
     
-    $sql = "update usuario set validez=DATE_SUB(now(),INTERVAL 6 MINUTE) where `idUsuario`='".$idusuario."'";
+    $sql = "update Usuario set Validez=DATE_SUB(now(),INTERVAL 6 MINUTE) where `idUsuario`='".$idusuario."'";
     $result = mysql_query($sql2,$conexion);
     if(mysql_affected_rows()>0) return true; //cookie puesta invalida
     else return false;

@@ -9,7 +9,7 @@ $registrar=0;
 if(isset($_POST['registrar']))
 {    
     $registrar = 1;
-    $error = registrarUsuario(limpiar($_POST['user']), $_POST['pass']);
+    $error = registrarUsuario(limpiar($_POST['newUser']), $_POST['newPassword'], $_POST['fullName'], $_POST['perfil']);
    
 }
 else if(isset($_POST['login']))
@@ -102,9 +102,9 @@ else if(isset($_POST['login']))
 								</div>
 								<div class="mainmenu pull-left">
 									<ul class="nav navbar-nav collapse navbar-collapse">
-										<li><a href="comprar.php"><i class="fa fa-home"></i> Comprar</a></li>
-								<li><a href="index.php" class="active"><i class="fa fa-lock"></i> Mi cuenta </a></li>
-								<li><a href="cart.php"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>
+										<!--<li><a href="comprar.php"><i class="fa fa-home"></i> Comprar</a></li>-->
+										<li><a href="index.php" class="active"><i class="fa fa-lock"></i> Iniciar Sesión </a></li>
+										<!--<li><a href="cart.php"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>-->
 			                    		<!--<li><a href="consola.php"><i class="fa fa-barcode"></i> Consola</a></li>-->
 									</ul>
 								</div>
@@ -155,21 +155,40 @@ else if(isset($_POST['login']))
 					</div><!--/login form-->
 				</div>
 				<div class="col-sm-1">
-					<h2 class="or">También</h2>
+					<h2 class="or">- o -</h2>
 				</div>
 
 				<div class="col-sm-4">
 					<div class="signup-form"><!--sign up form-->
 						<h2>¡Crea una nueva cuenta!</h2>
-						<form action="agregarUsuario.php" method="POST" accept-charset="utf-8">
-							<input type="text" placeholder="Usuario" name="user" <?php if($registrar && $error>0) echo 'value="'.limpiar($_POST['user']).'"'; ?> required/>
+						<form action="" method="POST" name="registrar" accept-charset="utf-8">
+							<input type="text" placeholder="Usuario" name="newUser" <?php if($registrar && $error>0) echo 'value="'.limpiar($_POST['user']).'"'; ?> required/>
 							<input type="text" placeholder="Nombre Completo" name="fullName" required/>
-							<input type="password" placeholder="Contraseña" name="password" required/>
+							<input type="password" placeholder="Contraseña" name="newPassword" required/>
 							<select name="perfil">
 								<option value="1">Soy una Agencia de Viajes</option>
 								<option value="2">Soy Particular</option>
 							</select>
-							<br><br><button type="submit" name="registrar" id="registrar" class="btn btn-default">Crear cuenta</button>
+							<br><br><button name="registrar" type="submit" id="registrar" class="btn btn-default">Crear cuenta</button>
+							<?php
+					            switch ($error) {
+					                case -1://login
+					                    echo '<br/><strong>Usuario o clave incorrecta</strong>';
+					                    break;
+					                case -2://registro
+					                    echo '<br/><strong>Error al registrarse. Usuario ya existente.</strong>';
+					                    break;
+					                case -3://registro
+					                    echo '<br/><strong>El usuario y la contraseña deben tener como mínimo 4 carácteres.</strong>';
+					                    break;
+					                case -4:
+					                	echo '<br/><strong>Captcha incorrecto. Vuelva a intentar.</strong>';
+					                    break;
+					                default:
+					                    if($registrar) echo '<br/><strong>Se ha registrado correctamente.</strong>';
+					                    break;
+					                }
+					          ?>
 						</form>
 					</div><!--/sign up form-->
 				</div>

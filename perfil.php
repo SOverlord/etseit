@@ -108,10 +108,10 @@ if(isset($_POST['salir']))
 						</div>
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a href="comprar.php" class="active"><i class="fa fa-home"></i> Comprar</a></li>
+								<li><a href="comprar.php"><i class="fa fa-home"></i> Comprar</a></li>
 								<!--<li><a href="index.php"><i class="fa fa-lock"></i> Mi cuenta </a></li>-->
 								<li><a href="cart.php"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>
-								<li><a href="perfil.php"><i class="fa fa-lock"></i> Mi Perfil </a></li>
+								<li><a href="perfil.php" class="active"><i class="fa fa-lock"></i> Mi Perfil </a></li>
 								<!--<li><a href="consola.php"><i class="fa fa-barcode"></i> Consola</a></li>-->
 							</ul>
 						</div>

@@ -16,10 +16,7 @@
 			$viajes=mysql_fetch_array($usr);
 			$viajesRealizados=$viajes['NumViajes'];
 			if($viajesRealizados){
-				echo $viajesRealizados;
 				$nuevosViajesRealizados = $viajesRealizados+1;
-				echo $nuevosViajesRealizados;
-				echo $key;
 	   			$sql2 = "UPDATE Usuario SET NumViajes=".$nuevosViajesRealizados." WHERE idUsuario=".$key." ";
 	   			$result2 = mysql_query($sql2,$conexion);
 	   			if($sql2){
