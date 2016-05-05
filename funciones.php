@@ -141,29 +141,29 @@ function login ($user,$pass,$recordarme)
     $pass = sha1($salt.md5($pass));
     
     $conexion=mysql_connect("localhost","root","qwerty",false);
-    $bd = mysql_select_db("etseit",$conexion);
+    $bd = mysql_select_db("etseitSystem",$conexion);
     mysql_query("SET NAMES 'utf8'");
     
-    $sql = "select idUsuarios from Usuarios where UPPER(Usuario)='".strtoupper($user)."' and Contrasena='".$pass."'";
+    $sql = "select idUsuario from Usuario where UPPER(Alias)='".strtoupper($user)."' and Password='".$pass."'";
     $result = mysql_query($sql,$conexion);
     if(mysql_affected_rows()<=0 || !$result) return -1; //user repetido
     
     $row = mysql_fetch_array($result);
-    $idUsuario = $row['idUsuarios'];
-    $_SESSION['usuario']=$idUsuario;
+    $idUsr = $row['idUsuario'];
+    $_SESSION['usuario']=$idUsr;
     
     if($recordarme){
         global $saltCookie;
 
-        $cookie = sha1($saltCookie.md5($idUsuario.date("Y-d-m h:i:s")));
+        $cookie = sha1($saltCookie.md5($idUsr.date("Y-d-m h:i:s")));
 
-        $sql2 = "update Usuarios set cookie='".$cookie."',validez=DATE_ADD(now(),INTERVAL 6 MINUTE) where `idUsuarios`='".$idUsuario."'";
+        $sql2 = "update Usuario set Cookie='".$cookie."',Validez=DATE_ADD(now(),INTERVAL 6 MINUTE) where idUsuario='".$idUsr."'";
         $result2 = mysql_query($sql2,$conexion);
 
         setCookie("identificado",$cookie,time()+360,'/'); //cookie 6min
     }
-    $_SESSION['usuario']=$idUsuario;
-    
+    $_SESSION['usuario']=$idUsr;
+    echo $idUsr;
     return true;
 }
 

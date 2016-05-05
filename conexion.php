@@ -4,7 +4,7 @@
 		exit();
     }
     mysql_set_charset('utf8', $driver);
-	if( !  (mysql_select_db("etseit",$driver))){
+	if( !  (mysql_select_db("etseitSystem",$driver))){
 		print("No se encontro la base de datos");
 		exit();
 	}

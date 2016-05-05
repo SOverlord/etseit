@@ -3,8 +3,8 @@ include('conexion.php');
 require ("funciones.php");
 $error = 0;
 
- seguridad(); //comprobamos que se esté logueado
-
+seguridad(); //comprobamos que se esté logueado
+$varSesionUser = $_SESSION['usuario'];
 if(isset($_POST['salir']))
 {    
     
@@ -100,7 +100,7 @@ if(isset($_POST['salir']))
 		<div class="header-bottom"><!--header-bottom-->
 			<div class="container">
 				<div class="row">
-					<div class="col-sm-8" style="text-align:center">
+					<div class="col-sm-8" style="text-align:center;">
 						<div class="navbar-header">
 							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 								<span class="sr-only">Toggle navigation</span>
@@ -114,19 +114,18 @@ if(isset($_POST['salir']))
 								<li><a href="comprar.php"><i class="fa fa-home"></i> Comprar</a></li>
 								<li><a href="index.php"><i class="fa fa-lock"></i> Mi cuenta </a></li>
 								<li><a href="cart.php" class="active"><i class="fa fa-shopping-cart"></i> Ver Carrito</a></li>
-								<li>
-								<form name="login" method="post" action="">
-                  						<input type="submit" name="salir" id="salir" value="Cerrar Sesión" />
-          									<?php
-            									if ($error) {
-                									echo '<br/><strong>Usuario o clave incorrecta</strong>';
-												}
-											?>
-								</form>
-								</li>
 							</ul>
 						</div>
 					</div>
+					<?php echo $_SESSION['usuario'];?>
+					<form name="login" method="post" action="" style="text-align:right;">
+      						<input type="submit" name="salir" id="salir" value="Cerrar Sesión" />
+									<?php
+									if ($error) {
+    									echo '<br/><strong>Usuario o clave incorrecta</strong>';
+									}
+								?>
+					</form>
 				</div>
 			</div>
 		</div><!--/header-bottom-->
@@ -138,75 +137,89 @@ if(isset($_POST['salir']))
 			<div class="table-responsive cart_info">
 				<table class="table table-condensed">
 					<thead>
-					<h2 style="text-align: center;">Tus Reservas de Hotel</h2>
+					<h1 style="text-align: center;">Tus Reservas de Hotel</h1>
 						<tr class="cart_menu" style="text-align: center;">
-							<td><b>Nombre del Hotel</b></td>
+							<td><b>Hotel</b></td>
 							<td><b>Ciudad</b></td>
-							<td><b>Inicio de Arrendamiento</b></td>
-							<td><b>Fin de Arrendamiento</b></td>
+							<td><b>Check-In</b></td>
+							<td><b>Check-Out</b></td>
 							<td><b>Habitaciones reservadas</b></td>
-							<td><b>Precio por noche</b></td>
+							<td><b>Costo por noche individual</b></td>
+							<td><b>A pagar</b></td>
 							<td><b>Cancelación</b></td>
 						</tr>
+					</thead>
+					<tbody style="text-align: center;">
 						<?php
-							$varSesionUser = $_SESSION['usuario'];
-							$carritoHotel=mysql_query("SELECT * FROM ReservaHotel WHERE idUsuario='".$varSesionUser."'");
+							$carritoHotel=mysql_query("SELECT * FROM ReservaHotel WHERE fk_idUsuario_ReservaHotel='".$varSesionUser."'");
 							if ($carritoHotel) {
 								$consultaHotel=mysql_num_rows($carritoHotel);
 								if ($consultaHotel) {
 									while ($productoCarrito_Hotel=mysql_fetch_array($carritoHotel)) {
 										if ($productoCarrito_Hotel) {
 											//Recuperamos todos los datos de la reserva
-											$idReserva=$productoCarrito_Hotel['idReserva'];
-											$idHotel=$productoCarrito_Hotel['Hotel_idHotel'];			//-->Con otra consulta recuperaremos el nombre del hotel, tasa y costo
-											$fechaInicio=$productoCarrito_Hotel['FechaInicio'];
-											$fechaFinal=$productoCarrito_Hotel['FechaFinal'];
-											//$costo=$productoCarrito_Hotel['CosteAsociado'];
-											$habitacionesReservadas=$productoCarrito_Hotel['NoHabitaciones'];
+											$idReservaHotel=$productoCarrito_Hotel['idReservaHotel'];
+											$fechaInicioHotel=$productoCarrito_Hotel['FechaInicio'];
+											$fechaFinalHotel=$productoCarrito_Hotel['FechaFinal'];
+											$idHot=$productoCarrito_Hotel['fk_idHotel_ReservaHotel'];
+											$habitacionesReservadas=$productoCarrito_Hotel['BoletosReservados'];
 
-											$selectHotel=mysql_query("SELECT * FROM Hotel WHERE '".$idHotel."' = idHotel ");
-											while($valHotel=mysql_fetch_array($selectHotel)){
-												$nombreHotel=$valHotel['NombreHotel'];
-												$costoHotel=$valHotel['Precio'];
+											$hotel=mysql_query("SELECT * FROM Hotel WHERE idHotel ='".$idHot."' ");
+											if($hotel){
+												$recuperaHotel=mysql_num_rows($hotel);
+												if($recuperaHotel){
+													while($datosHotel=mysql_fetch_array($hotel)){
+														if($datosHotel){
+															$idCiudad=$datosHotel['fk_idCiudad_Hotel'];
+															$idServicio=$datosHotel['fk_idServicio_Hotel'];
+														}
+													}
+												}
 											}
-												
-											$IDciudadHotel=mysql_query("SELECT * FROM CiudadHotel WHERE '".$idHotel."' = CiudadHotel_idHotel_fk ");
-											while($ciudadHotel=mysql_fetch_array($IDciudadHotel)){
-												$idCiudad=$ciudadHotel['CiudadHotel_idCiudad_fk'];
+
+											$ciudad=mysql_query("SELECT NombreCiudad FROM Ciudad WHERE idCiudad = '".$idCiudad."' ");
+											if(is_resource($ciudad) and mysql_num_rows($ciudad) > 0){
+												$cd = mysql_fetch_array($ciudad);
+												$nombreCiudad=$cd['NombreCiudad'];
 											}
-											$nC=mysql_query("SELECT NombreCiudad FROM Ciudad WHERE '".$idCiudad."' = idCiudad ");
-											while($nCiud=mysql_fetch_array($nC)){
-												$nombreCiudad=$nCiud['NombreCiudad'];
+											$servicio=mysql_query("SELECT * FROM Servicios WHERE idServicio = '".$idServicio."' ");
+											if(is_resource($servicio) and mysql_num_rows($servicio)>0){
+												$datos=mysql_fetch_array($servicio);
+												$nombreHotel=$datos['NombreServicio'];
+												$costo=$datos['Precio'];
 											}
+											$segs=strtotime($fechaFinalHotel) - strtotime($fechaInicioHotel);
+											$diferencia=intval($segs/60/60/24);
+											$pagoTotalHotel = $costo*$diferencia*$habitacionesReservadas;
+
 											?>
-											</thead>
-											<tbody style="text-align: center;">
+											
 											<tr>
 												<td><?php echo $nombreHotel; 	?></td>
-												<td><?php echo $nombreCiudad; 		?></td>
-												<td><?php echo $fechaInicio; 	?></td>
-												<td><?php echo $fechaFinal; 	?></td>
+												<td><?php echo $nombreCiudad; 	?></td>
+												<td><?php echo $fechaInicioHotel; 	?></td>
+												<td><?php echo $fechaFinalHotel; 	?></td>
 												<td><?php echo $habitacionesReservadas;	?></td>
-												<td><?php echo $costoHotel; 	?></td>
+												<td>$ <?php echo $costo; 	?></td>
+												<td>$ <?php echo $pagoTotalHotel;	?></td>
 												<td class="cart_delete" style="text-align:center">
-													<form action="eliminaCarrito.php" mehtod="GET" target="_self">
-					                              <input name="k" type="hidden" value="<?php echo $idReserva; ?>">
-					                              <input type="submit" value="Cancelar"> </td>
+												<form action="eliminaCarritoHotel.php" mehtod="GET" target="_self">
+					                            	<input name="hotel" type="hidden" value="<?php echo $idReservaHotel; ?>">
+					                            	<input type="submit" value="Cancelar"> </td>
+					                            </form>
 											</tr> <?php
-											if(!$idReserva) die('idReserva error: ' . mysql_error());
-											if(!$idHotel) die('idHotel error: ' . mysql_error());
-											if(!$fechaInicio) die('fechaInicio error: ' . mysql_error());
-											if(!$fechaFinal) die('fechaFinal error: ' . mysql_error());
+											if(!$idReservaHotel) die('idReservaHotel error: ' . mysql_error());
+											if(!$idHot) die('idHotel error: ' . mysql_error());
+											if(!$fechaInicioHotel) die('fechaInicio error: ' . mysql_error());
+											if(!$fechaFinalHotel) die('fechaFinal error: ' . mysql_error());
 											if(!$habitacionesReservadas) die('habitacionesReservadas error: ' . mysql_error());
-											if(!$nombreHotel) die('nombreHotel error: ' . mysql_error());
-											if(!$costoHotel) die('costoHotel error: ' . mysql_error());
-											if(!$IDciudadHotel) die('IDciudadHotel error: ' . mysql_error());
+											if(!$hotel) die('hotel error: ' . mysql_error());
+											if(!$recuperaHotel) die('recuperaHotel error: ' . mysql_error());
 											if(!$idCiudad) die('idCiudad error: ' . mysql_error());
-											if(!$nC) die('nC error: ' . mysql_error());
-											if(!$nombreCiudad) die('nombreCiudad error: ' . mysql_error());
+											if(!$idServicio) die('idServicio error: ' . mysql_error());
 										}else{	die('productoCarrito_Hotel error: ' . mysql_error());	}
 									}
-								}else{	print("<tr><h1>Usted aún no realiza ninguna compra</h1></tr></thead><tbody>");	}
+								}else{	?> <tr><th colspan="8" style="text-align: center;"><h3>Usted aún no realiza ninguna compra</h3><th></tr> <?php }
 							}else{	die('carritoHotel error: ' . mysql_error());	}
 						?>
 					</tbody>
@@ -216,56 +229,354 @@ if(isset($_POST['salir']))
 	</section>	
 
 	<!--Muestra carrito de Barco-->
+	<section id="cart_items">
+		<div class="container">
+			<div class="table-responsive cart_info">
+				<table class="table table-condensed">
+					<thead>
+					<h1 style="text-align: center;">Tus Reservas de Barco</h1>
+						<tr class="cart_menu" style="text-align: center;">
+							<td><b>Barco</b></td>
+							<td><b>Puerto de Zarpe</b></td>
+							<td><b>Ciudad de Zarpe</b></td>
+							<td><b>Zarpe</b></td>
+							<td><b>Arribo</b></td>
+							<td><b>Boletos reservados</b></td>
+							<td><b>Costo por boleto</b></td>
+							<td><b>A Pagar</b></td>
+							<td><b>Cancelación</b></td>
+						</tr>
+						</thead>
+						<tbody style="text-align: center;">
+						<?php
+							$carritoBarco=mysql_query("SELECT * FROM ReservaBarco WHERE fk_idUsuario_ReservaBarco='".$varSesionUser."'");
+							if ($carritoBarco) {
+								$consultaBarco=mysql_num_rows($carritoBarco);
+								if ($consultaBarco) {
+									while ($productoCarrito_Barco=mysql_fetch_array($carritoBarco)) {
+										if ($productoCarrito_Barco) {
+											//Recuperamos todos los datos de la reserva
+											$idReservaBarco=$productoCarrito_Barco['idReservaBarco'];
+											$fechaInicio=$productoCarrito_Barco['FechaInicio'];
+											$fechaFinal=$productoCarrito_Barco['FechaFinal'];
+											$idPuerto=$productoCarrito_Barco['fk_idPuerto_ReservaBarco'];
+											$habitacionesReservadas=$productoCarrito_Barco['BoletosReservados'];
+
+											$puerto=mysql_query("SELECT * FROM Puerto WHERE idPuerto ='".$idPuerto."' ");
+											if($puerto){
+												$recuperaPuerto=mysql_num_rows($puerto);
+												if($recuperaPuerto){
+													while($datosPuerto=mysql_fetch_array($puerto)){
+														if($datosPuerto){
+															$nombrePuerto=$datosPuerto['NombrePuerto'];
+															$idCiudad=$datosPuerto['fk_idCiudad_Puerto'];
+															$idServicio=$datosPuerto['fk_idServicio_Puerto'];
+														}
+													}
+												}
+											}
+
+											$ciudad=mysql_query("SELECT NombreCiudad FROM Ciudad WHERE idCiudad = '".$idCiudad."' ");
+											if(is_resource($ciudad) and mysql_num_rows($ciudad) > 0){
+												$cd = mysql_fetch_array($ciudad);
+												$nombreCiudad=$cd['NombreCiudad'];
+											}
+											$servicio=mysql_query("SELECT * FROM Servicios WHERE idServicio = '".$idServicio."' ");
+											if(is_resource($servicio) and mysql_num_rows($servicio)>0){
+												$datosServicio=mysql_fetch_array($servicio);
+												$nombre=$datosServicio['NombreServicio'];
+												$costoBarco=$datosServicio['Precio'];
+											}
+											$pagoTotalBarco=$costoBarco*$habitacionesReservadas;
+											?>
+											<tr>
+												<td><?php echo $nombre; 	?></td>
+												<td><?php echo $nombrePuerto; 	?></td>
+												<td><?php echo $nombreCiudad; 	?></td>
+												<td><?php echo $fechaInicio; 	?></td>
+												<td><?php echo $fechaFinal; 	?></td>
+												<td><?php echo $habitacionesReservadas;	?></td>
+												<td>$ <?php echo $costoBarco; 	?></td>
+												<td>$ <?php echo $pagoTotalBarco; 	?></td>
+												<td class="cart_delete" style="text-align:center">
+												<form action="eliminaCarritoBarco.php" mehtod="GET" target="_self">
+					                            	<input name="barco" type="hidden" value="<?php echo $idReservaBarco; ?>">
+					                            	<input type="submit" value="Cancelar"> </td>
+					                            </form>
+											</tr> <?php
+											if(!$idReservaBarco) die('idReserva error: ' . mysql_error());
+											if(!$fechaInicio) die('fechaInicio error: ' . mysql_error());
+											if(!$fechaFinal) die('fechaFinal error: ' . mysql_error());
+											if(!$habitacionesReservadas) die('habitacionesReservadas error: ' . mysql_error());
+											if(!$idCiudad) die('idCiudad error: ' . mysql_error());
+											if(!$idServicio) die('idServicio error: ' . mysql_error());
+										}else{	die('productoCarrito_Barco error: ' . mysql_error());	}
+									}
+								}else{	?> <tr><th colspan="9" style="text-align: center;"><h3>Usted aún no realiza ninguna compra</h3><th></tr> <?php }
+							}else{	die('carritoBarco error: ' . mysql_error());	}
+						?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>	
 
 	<!--Muestra carrito de boletos de Avión-->
+	<section id="cart_items">
+		<div class="container">
+			<div class="table-responsive cart_info">
+				<table class="table table-condensed">
+					<thead>
+					<h1 style="text-align: center;">Tus Reservas de Boletos de Avión</h1>
+						<tr class="cart_menu" style="text-align: center;">
+							<td><b>Aerolínea</b></td>
+							<td><b>Aeropuerto de Salida</b></td>
+							<td><b>Ciudad de Salida</b></td>
+							<td><b>Ida</b></td>
+							<td><b>Regreso</b></td>
+							<td><b>Boletos reservados</b></td>
+							<td><b>Costo por boleto</b></td>
+							<td><b>A Pagar</b></td>
+							<td><b>Cancelación</b></td>
+						</tr>
+						</thead>
+						<tbody style="text-align: center;">
+						<?php
+							$carritoAvion=mysql_query("SELECT * FROM ReservaAvion WHERE fk_idUsuario_ReservaAvion='".$varSesionUser."'");
+							if ($carritoAvion) {
+								$consultaAvion=mysql_num_rows($carritoAvion);
+								if ($consultaAvion) {
+									while ($productoCarrito_Avion=mysql_fetch_array($carritoAvion)) {
+										if ($productoCarrito_Avion) {
+											//Recuperamos todos los datos de la reserva
+											$idReservaAvion=$productoCarrito_Avion['idReservaAvion'];
+											$fechaSalida=$productoCarrito_Avion['FechaInicio'];
+											$fechaRetorno=$productoCarrito_Avion['FechaFinal'];
+											$idAeropuerto=$productoCarrito_Avion['fk_idAeropuerto_ReservaAvion'];
+											$boletosReservados=$productoCarrito_Avion['BoletosReservados'];
+
+											$aeropuerto=mysql_query("SELECT * FROM Aeropuerto WHERE idAeropuerto ='".$idAeropuerto."' ");
+											if($aeropuerto){
+												$recuperaAeropuerto=mysql_num_rows($aeropuerto);
+												if($recuperaAeropuerto){
+													while($datosAeropuerto=mysql_fetch_array($aeropuerto)){
+														if($datosAeropuerto){
+															$nombreAeropuerto=$datosAeropuerto['NombreAeropuerto'];
+															$idCiudadAeropuerto=$datosAeropuerto['fk_idCiudad_Aeropuerto'];
+															$idServicioAeropuerto=$datosAeropuerto['fk_idServicio_Aeropuerto'];
+														}
+													}
+												}
+											}
+
+											$ciudad=mysql_query("SELECT NombreCiudad FROM Ciudad WHERE idCiudad = '".$idCiudadAeropuerto."' ");
+											if(is_resource($ciudad) and mysql_num_rows($ciudad) > 0){
+												$cd = mysql_fetch_array($ciudad);
+												$nombreCiudad=$cd['NombreCiudad'];
+											}
+											$servicio=mysql_query("SELECT * FROM Servicios WHERE idServicio = '".$idServicioAeropuerto."' ");
+											if(is_resource($servicio) and mysql_num_rows($servicio)>0){
+												$datosServicio=mysql_fetch_array($servicio);
+												$nombre=$datosServicio['NombreServicio'];
+												$costoAvion=$datosServicio['Precio'];
+											}
+											$pagoTotalAvion=$costoAvion*$boletosReservados;
+											?>
+											<tr>
+												<td><?php echo $nombre; 	?></td>
+												<td><?php echo $nombreAeropuerto; 	?></td>
+												<td><?php echo $nombreCiudad; 	?></td>
+												<td><?php echo $fechaSalida; 	?></td>
+												<td><?php echo $fechaRetorno; 	?></td>
+												<td><?php echo $boletosReservados;	?></td>
+												<td>$ <?php echo $costoAvion; 	?></td>
+												<td>$ <?php echo $pagoTotalAvion; 	?></td>
+												<td class="cart_delete" style="text-align:center">
+												<form action="eliminaCarritoAvion.php" mehtod="GET" target="_self">
+					                            	<input name="avion" type="hidden" value="<?php echo $idReservaAvion; ?>">
+					                            	<input type="submit" value="Cancelar"> </td>
+					                            </form>
+											</tr> <?php
+											if(!$idReservaAvion) die('idReservaAvion error: ' . mysql_error());
+											if(!$fechaSalida) die('fechaSalida error: ' . mysql_error());
+											if(!$fechaRetorno) die('fechaRetorno error: ' . mysql_error());
+											if(!$boletosReservados) die('boletosReservados error: ' . mysql_error());
+											if(!$idCiudadAeropuerto) die('idCiudadAeropuerto error: ' . mysql_error());
+											if(!$idServicioAeropuerto) die('idServicioAeropuerto error: ' . mysql_error());
+										}else{	die('productoCarrito_Avion error: ' . mysql_error());	}
+									}
+								}else{	?> <tr><th colspan="9" style="text-align: center;"><h3>Usted aún no realiza ninguna compra</h3><th></tr> <?php }
+							}else{	die('carritoAvion error: ' . mysql_error());	}
+						?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>
 
 	<!--Muestra carrito de Vehículos-->
+	<section id="cart_items">
+		<div class="container">
+			<div class="table-responsive cart_info">
+				<table class="table table-condensed">
+					<thead>
+					<h1 style="text-align: center;">Tus Reservas de Boletos de Automóvil</h1>
+						<tr class="cart_menu" style="text-align: center;">
+							<td><b>Marca</b></td>
+							<td><b>Agencia</b></td>
+							<td><b>Ciudad</b></td>
+							<td><b>Inicio de Arrendamiento</b></td>
+							<td><b>Fin de Arrendamiento</b></td>
+							<td><b>Costo Diario</b></td>
+							<td><b>A Pagar</b></td>
+							<td><b>Cancelación</b></td>
+						</tr>
+						</thead>
+						<tbody style="text-align: center;">
+						<?php
+							$carritoAuto=mysql_query("SELECT * FROM ReservaAuto WHERE fk_idUsuario_ReservaAuto='".$varSesionUser."'");
+							if ($carritoAuto) {
+								$consultaAuto=mysql_num_rows($carritoAuto);
+								if ($consultaAuto) {
+									while ($productoCarrito_Auto=mysql_fetch_array($carritoAuto)) {
+										if ($productoCarrito_Auto) {
+											//Recuperamos todos los datos de la reserva
+											$idReservaAuto=$productoCarrito_Auto['idReservaAuto'];
+											$fechaInicio=$productoCarrito_Auto['FechaInicio'];
+											$fechaFinal=$productoCarrito_Auto['FechaFinal'];
+											$idAgenciaAuto=$productoCarrito_Auto['fk_idAgenciaAuto_ReservaAuto'];
+
+											$agencia=mysql_query("SELECT * FROM AgenciaAuto WHERE idAgenciaAuto ='".$idAgenciaAuto."' ");
+											if($agencia){
+												$recuperaAgenciaAuto=mysql_num_rows($agencia);
+												if($recuperaAgenciaAuto){
+													while($datosAgenciaAuto=mysql_fetch_array($agencia)){
+														if($datosAgenciaAuto){
+															$nombreAgenciaAuto=$datosAgenciaAuto['NombreAgenciaAuto'];
+															$idCiudadAgenciaAuto=$datosAgenciaAuto['fk_idCiudad_AgenciaAuto'];
+															$idServicioAgenciaAuto=$datosAgenciaAuto['fk_idServicio_AgenciaAuto'];
+														}
+													}
+												}
+											}
+
+											$ciudad=mysql_query("SELECT NombreCiudad FROM Ciudad WHERE idCiudad = '".$idCiudadAgenciaAuto."' ");
+											if(is_resource($ciudad) and mysql_num_rows($ciudad) > 0){
+												$cd = mysql_fetch_array($ciudad);
+												$nombreCiudad=$cd['NombreCiudad'];
+											}
+											$servicio=mysql_query("SELECT * FROM Servicios WHERE idServicio = '".$idServicioAgenciaAuto."' ");
+											if(is_resource($servicio) and mysql_num_rows($servicio)>0){
+												$datosServicio=mysql_fetch_array($servicio);
+												$nombre=$datosServicio['NombreServicio'];
+												$costoAuto=$datosServicio['Precio'];
+											}
+											$segs=strtotime($fechaFinal) - strtotime($fechaInicio);
+											$diasReserva=intval($segs/60/60/24);
+											$pagoTotalAuto=$costoAuto*$diasReserva;
+											?>
+											<tr>
+												<td><?php echo $nombre; 	?></td>
+												<td><?php echo $nombreAgenciaAuto; 	?></td>
+												<td><?php echo $nombreCiudad; 	?></td>
+												<td><?php echo $fechaInicio; 	?></td>
+												<td><?php echo $fechaFinal; 	?></td>
+												<td>$ <?php echo $costoAuto; 	?></td>
+												<td>$ <?php echo $pagoTotalAuto; 	?></td>
+												<td class="cart_delete" style="text-align:center">
+												<form action="eliminaCarritoAuto.php" mehtod="GET" target="_self">
+					                            	<input name="auto" type="hidden" value="<?php echo $idReservaAuto; ?>">
+					                            	<input type="submit" value="Cancelar"> </td>
+					                            </form>
+											</tr> <?php
+											if(!$idReservaAuto) die('idReservaAuto error: ' . mysql_error());
+											if(!$fechaInicio) die('fechaInicio error: ' . mysql_error());
+											if(!$fechaFinal) die('fechaFinal error: ' . mysql_error());
+											if(!$idCiudadAgenciaAuto) die('idCiudadAgenciaAuto error: ' . mysql_error());
+											if(!$idServicioAgenciaAuto) die('idServicioAgenciaAuto error: ' . mysql_error());
+										}else{	die('productoCarrito_Auto error: ' . mysql_error());	}
+									}
+								}else{	?> <tr><th colspan="9" style="text-align: center;"><h3>Usted aún no realiza ninguna compra</h3><th></tr> <?php }
+							}else{	die('carritoAuto error: ' . mysql_error());	}
+						?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>
 
 
 	<section id="do_action">
 		<div class="container">
 			<div class="heading">
-				<h3>Verifica tus datos</h3>
-				<p>Comprueba que tu monto total de compra e ingresa los datos donde será realizado el envío.</p>
+				<h1>Verifica tus datos</h1>
+				<p>Comprueba tu monto total de compra e ingresa los datos correspondientes.</p>
 			</div>
 			<div class="row">
 				<div class="col-sm-6">
 					<div class="chose_area">
 						<ul class="user_info">
+							<h3>Datos de Tarjeta</h3>
 							<li class="single_field">
-								<label>País:</label>
-								<select name="pais">
-									<option value="mex">México</option>
-									<option value="eua">Estados Unidos</option>
-									<option value="uk">UK</option>
-									<option value="can">Canadá</option>
-									<option value="pak">Pakistan</option>
-								</select>
+								<input type="text" placeholder="Numero de tarjeta" autofocus required>
 							</li>
 							<li class="single_field">
-								<label>Ciudad</label>
-								<input type="text" name="ciudad">
+								<input type="text" placeholder="Vencimiento" required>
 							</li>
 							<li class="single_field">
-								<label>Dirección</label>
-								<input type="text" name="direccion">
+								<input type="text" placeholder="CVV" required>
 							</li>
-							<li class="single_field zip-field">
-								<label>CP:</label>
-								<input type="text" name="cp">
-							</li>
+						</ul>
+						<ul>
+							<input type="checkbox"> Acepto los términos y condiciones</input><br>
+							Viajes EITSET no almacena datos personales ni de su tarjeta de crédito o débito.
 						</ul>
 					</div>
 				</div>
 				<div class="col-sm-6">
 					<div class="total_area">
+					<?php
+						$usr=mysql_query("SELECT NumViajes FROM Usuario WHERE idUsuario='".$varSesionUser."'");
+						if(is_resource($usr)){
+							if(mysql_num_rows($usr)>0){
+								$viajes=mysql_fetch_array($usr);
+								$viajesRealizados=$viajes['NumViajes'];
+								$descuento = 0.0;
+							}else{
+								die('mysql_num_rows($usr) error: ' . mysql_error());
+							}
+						}else{
+							die('is_resource($usr) error: ' . mysql_error());
+						}
+					?>
 						<ul>
-							<li>Sub total <span>$59</span></li>
-							<li>Impuestos <span>$2</span></li>
-							<li>Costo de envío <span>Free</span></li>
-							<li>Total <span>$61</span></li>
+							<li>SUB TOTAL <span>$ <?php $pagoTotal=$pagoTotalHotel+$pagoTotalBarco+$pagoTotalAvion+$pagoTotalAuto; echo $pagoTotal; ?></span></li>
+							<li>DESCUENTO <span>
+							<?php
+								if($viajesRealizados<=4){
+									echo 'No aplicable hasta su quinto viaje';
+								}
+								elseif ($viajesRealizados<=9) {
+									echo '5%';
+									$descuento=0.05;
+								}
+								elseif ($viajesRealizados<=14) {
+									echo '10%';
+									$descuento=0.1;
+								}
+								elseif ($viajesRealizados>=15) {
+									echo '15%';
+									$descuento=0.15;
+								}
+							?>
+							</span></li>
+							<li>DESCUENTO APLICABLE <span> - $<?php echo ($pagoTotal*$descuento);?></span></li>
+							<li>TOTAL A PAGAR <span>$ <?php $TotalaPagar=$pagoTotal*(1-$descuento); echo $TotalaPagar; ?></span></li>
 						</ul>
-							<a class="btn btn-default check_out" href="">Realizar Compra</a>
+							<form action="realizarCompra.php" mehtod="GET" target="_self">
+								<input name="comprar" type="hidden" value="<?php echo $varSesionUser; ?>">
+								<input type="submit" value="Realizar Compra"> </td>
+							</form>
 					</div>
 				</div>
 			</div>

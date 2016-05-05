@@ -7,8 +7,8 @@
 </head>
 <body>
 <?php
-   $key = $_GET['k'];
-   $sql=mysql_query("DELETE FROM ReservaHotel WHERE idReserva='".$key."'");
+   $key = $_GET['barco'];
+   $sql=mysql_query("DELETE FROM ReservaBarco WHERE idReservaBarco='".$key."'");
 	//print("El registro se ha eliminado correctamente");
 	//print("<a href='cart.php'>Regresar</a>");
 ?>
